@@ -39,7 +39,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
   cors({
-    origin: ["https://esm-jade.vercel.app"],
+    origin: ["https://esm-deploy.vercel.app"],
     method: ["POST", "GET"],
     credentials: true,
   })
