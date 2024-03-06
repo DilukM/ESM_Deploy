@@ -52,7 +52,7 @@ app.use("/management", managementRoutes);
 app.use("/sales", salesRoutes);
 
 /* MONGOOSE SETUP */
-const PORT = 5001 || 9000;
+const PORT = 5000 || 9000;
 mongoose
   .connect(
     "mongodb+srv://ghost:ghost99@esm.gjtd61h.mongodb.net/?retryWrites=true&w=majority",
