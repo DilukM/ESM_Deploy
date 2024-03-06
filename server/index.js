@@ -62,6 +62,10 @@ mongoose
     }
   )
   .then(() => {
+    // Define a route for the root URL "/"
+    app.get("/", (req, res) => {
+      res.send("Hello World!"); // Send a simple response
+    });
     app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
 
     /* ONLY ADD DATA ONE TIME */
