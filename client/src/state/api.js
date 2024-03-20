@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://esm-deploy-server.vercel.app",
+    baseUrl: "https://esm-deploy-server-efc1grnyw-dilukms-projects.vercel.app",
   }),
   reducerPath: "adminApi",
   tagTypes: [
