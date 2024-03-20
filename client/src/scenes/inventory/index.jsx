@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Box, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetTransactionsQuery } from "state/api";
 import Header from "components/Header";
-
+import { useGetReleaseItemsQuery, useDeleteDonorMutation } from "state/api";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 
 
@@ -11,11 +11,15 @@ import { Avatar, Button, Tab, Tabs, Typography,Modal,
   TextField} from "@mui/material";
 import { Link } from "react-router-dom";
 import DonorEvents from "./donorEvents";
+import UpdateFormCI from "./updateFormCI";
 
 const Inventory = () => {
   const theme = useTheme();
+  const [showForm, setShowForm] = useState(false);
+  const [showUpdateFormCI, setShowUpdateFormCI] = useState(false);
 
   // values to be sent to the backend
+  const [deleteDonor] = useDeleteDonorMutation();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [sort, setSort] = useState({});
@@ -26,6 +30,40 @@ const Inventory = () => {
 
   const [isHoveredBtn, setIsHoveredBtn] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  const [searchInput, setSearchInput] = useState("");
+  const { data, isLoading, refetch } = useGetReleaseItemsQuery();
+  const [rowIndex, setRowIndex] = useState(0); // State for custom index
+
+  useEffect(() => {
+    if (data) {
+      setRowIndex(0); // Reset the index when data changes
+    }
+  }, [data]);
+
+  const handleDelete = (donorId) => {
+    deleteDonor(donorId)
+      .unwrap()
+      .then((response) => {
+        console.log("Donor deleted successfully");
+        // Optionally, you can trigger a refetch of the donors list
+      })
+      .catch((error) => {
+        console.error("Error deleting donor:", error);
+      });
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setShowUpdateFormCI(false);
+  };
+  const generateRowsWithIndex = (rows) => {
+    return rows.map((row, index) => ({ ...row, index: rowIndex + index + 1 }));
+  };
 
   //Add Item...
   const [addItem, setAddItem] = useState({
@@ -46,17 +84,17 @@ const Inventory = () => {
    
   });
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
+  // const handleTabChange = (event, newValue) => {
+  //   setActiveTab(newValue);
+  // };
 
-  const [searchInput, setSearchInput] = useState("");
-  const { data, isLoading } = useGetTransactionsQuery({
-    page,
-    pageSize,
-    sort: JSON.stringify(sort),
-    search,
-  });
+  // const [searchInput, setSearchInput] = useState("");
+  // const { data, isLoading } = useGetTransactionsQuery({
+  //   page,
+  //   pageSize,
+  //   sort: JSON.stringify(sort),
+  //   search,
+  // });
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -110,34 +148,234 @@ const Inventory = () => {
     handleCloseModal();
   };
 
-  const columns = [
+  const overview = [
     {
-      field: "_id",
-      headerName: "ID",
+      field: "eventid",
+      headerName: "Event ID",
+      flex: 1,
+    },
+    
+    {
+      field: "itemId",
+      headerName: "Item ID",
       flex: 1,
     },
     {
-      field: "userId",
-      headerName: "User ID",
+      field: "date",
+      headerName: "Date",
       flex: 1,
     },
     {
-      field: "createdAt",
-      headerName: "CreatedAt",
-      flex: 1,
-    },
-    {
-      field: "products",
-      headerName: "# of Products",
+      field: "quantity",
+      headerName: "Quantity",
       flex: 0.5,
       sortable: false,
-      renderCell: (params) => params.value.length,
+      
     },
     {
-      field: "cost",
-      headerName: "Cost",
+      field: "donorId",
+      headerName: "Donor Id",
       flex: 1,
-      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
+     
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Box display="flex" justifyContent="space-around">
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            mr={2}
+            sx={{
+              "& button": {
+                backgroundColor: theme.palette.secondary[400],
+                color: "white",
+              },
+            }}
+          >
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => handleDelete(params.row._id)}
+            >
+              Delete
+            </Button>
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            sx={{
+              "& button": {
+                backgroundColor: theme.palette.primary[700],
+                color: "white",
+              },
+            }}
+          >
+            <Button
+              variant="contained"
+              color="info"
+              onClick={() => setShowUpdateFormCI(true)}
+            >
+              Update
+            </Button>
+          </Box>
+        </Box>
+      ),
+    },
+  ];
+
+  const currentItems = [
+    {
+      field: "itemId",
+      headerName: "Item ID",
+      flex: 1,
+    },
+    
+    {
+      field: "itemName",
+      headerName: "Item Name",
+      flex: 1,
+    },
+    {
+      field: "quantity",
+      headerName: "Quantity",
+      flex: 0.5,
+      sortable: false,
+      
+    },
+    {
+      field: "date",
+      headerName: "Date",
+      flex: 1,
+    },
+    
+    
+    {
+      field: "",
+      headerName: "Actions",
+      flex: 1,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Box display="flex" justifyContent="space-around">
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            mr={2}
+            sx={{
+              "& button": {
+                backgroundColor: theme.palette.secondary[400],
+                color: "white",
+              },
+            }}
+          >
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => handleDelete(params.row._id)}
+            >
+              Delete
+            </Button>
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            sx={{
+              "& button": {
+                backgroundColor: theme.palette.primary[700],
+                color: "white",
+              },
+            }}
+          >
+            <Button
+              variant="contained"
+              color="info"
+              onClick={() => setShowUpdateFormCI(true)}
+            >
+              Update
+            </Button>
+          </Box>
+        </Box>
+      ),
+    },
+  ];
+
+  const releaseItems = [
+    {
+      field: "itemID",
+      headerName: "Item ID",
+      flex: 1,
+    },
+    
+    {
+      field: "quantity",
+      headerName: "Quantity",
+      flex: 1,
+    },
+    {
+      field: "eventId",
+      headerName: "Event Id",
+      flex: 1,
+    },
+    {
+      field: "date",
+      headerName: "Date",
+      flex: 0.5,
+      sortable: false,
+      
+    },
+    
+    {
+      field: "",
+      headerName: "Actions",
+      flex: 1,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Box display="flex" justifyContent="space-around">
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            mr={2}
+            sx={{
+              "& button": {
+                backgroundColor: theme.palette.secondary[400],
+                color: "white",
+              },
+            }}
+          >
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => handleDelete(params.row._id)}
+            >
+              Delete
+            </Button>
+          </Box>
+          {/* <Box
+            display="flex"
+            justifyContent="flex-end"
+            sx={{
+              "& button": {
+                backgroundColor: theme.palette.primary[700],
+                color: "white",
+              },
+            }}
+          >
+            <Button
+              variant="contained"
+              color="info"
+              onClick={() => setShowUpdateFormCI(true)}
+            >
+              Update
+            </Button>
+          </Box> */}
+        </Box>
+      ),
     },
   ];
 
@@ -180,6 +418,13 @@ const Inventory = () => {
               </Button>
             </Link>
           </Box>
+
+          <UpdateFormCI
+            open={showUpdateFormCI}
+            handleClose={handleCloseForm}
+            refetch={refetch}
+          />
+
           <Box
             height="80vh"
             sx={{
@@ -210,8 +455,8 @@ const Inventory = () => {
             <DataGrid
               loading={isLoading || !data}
               getRowId={(row) => row._id}
-              rows={(data && data.transactions) || []}
-              columns={columns}
+              rows={data  || []}
+              columns={overview}
               rowCount={(data && data.total) || 0}
               rowsPerPageOptions={[20, 50, 100]}
               pagination
@@ -252,6 +497,12 @@ const Inventory = () => {
          Add Item
         </Button>
           </Box>
+
+          <UpdateFormCI
+            open={showUpdateFormCI}
+            handleClose={handleCloseForm}
+            refetch={refetch}
+          />
 
           <Modal
         open={openModal}
@@ -362,7 +613,7 @@ const Inventory = () => {
               loading={isLoading || !data}
               getRowId={(row) => row._id}
               rows={(data && data.transactions) || []}
-              columns={columns}
+              columns={currentItems}
               rowCount={(data && data.total) || 0}
               rowsPerPageOptions={[20, 50, 100]}
               pagination
@@ -407,6 +658,12 @@ const Inventory = () => {
          Release Item
         </Button>
       </Box>
+
+      <UpdateFormCI
+            open={showUpdateFormCI}
+            handleClose={handleCloseForm}
+            refetch={refetch}
+          />
 
       <Modal
         open={openModal}
@@ -515,8 +772,8 @@ const Inventory = () => {
             <DataGrid
               loading={isLoading || !data}
               getRowId={(row) => row._id}
-              rows={(data && data.transactions) || []}
-              columns={columns}
+              rows={data  || []}
+              columns={releaseItems}
               rowCount={(data && data.total) || 0}
               rowsPerPageOptions={[20, 50, 100]}
               pagination

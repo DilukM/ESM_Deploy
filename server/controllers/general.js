@@ -1,7 +1,9 @@
 import User from "../models/User.js";
 import OverallStat from "../models/OverallStat.js";
 import Transaction from "../models/Transaction.js";
-import Donors from "../models/Donor.js";
+import CurrentItems from "../models/CurrentItems.js";
+import ReleaseItems from "../models/ReleaseItems.js";
+import Items_out from "../models/Items_out.js";
 
 export const getUser = async (req, res) => {
   try {
@@ -13,60 +15,123 @@ export const getUser = async (req, res) => {
   }
 };
 
-export const addDonor = async (req, res) => {
-  try {
-    const { name, phone, email, password } = req.body;
+//CurrentItems....
 
-    // Create a new donor instance
-    const newDonor = new Donors({
-      name,
-      phone,
-      email,
-      password,
+export const addCurrentItem = async (req, res) => {
+  try {
+    const { itemId, itemName, quantity, date } = req.body;
+
+    // Create a new current item instance
+    const newCurrentItem = new CurrentItems({
+      itemId,
+      itemName,
+      quantity,
+      date,
     });
 
-    // Save the donor to the database
-    const savedDonor = await newDonor.save();
+    // Save the current item to the database
+    const savedCurrentItem = await newCurrentItem.save();
 
-    res.status(201).json(savedDonor); // Respond with the saved donor
+    res.status(201).json(savedCurrentItem); // Respond with the saved current item
   } catch (error) {
-    console.error("Error adding new donor:", error);
-    res.status(500).json({ error: "Failed to add new donor" });
+    console.error("Error adding new Item:", error);
+    res.status(500).json({ error: "Failed to add new Item" });
   }
 };
 
-export const getDonors = async (req, res) => {
+export const getCurrentItems = async (req, res) => {
   try {
-    const donors = await Donors.find();
-    res.status(200).json(donors);
+    const currentItems = await CurrentItems.find();
+    res.status(200).json(currentItems);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-export const getDonor = async (req, res) => {
+export const getCurrentItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const donors = await Donors.findById(id);
-    res.status(200).json(donors);
+    const currentItems = await CurrentItems.findById(id);
+    res.status(200).json(currentItems);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-export const deleteDonors = async (req, res) => {
+export const deleteCurrentItems = async (req, res) => {
   const { id } = req.params;
   try {
-    const deletedDonor = await Donors.findByIdAndDelete(id);
-    if (!deletedDonor) {
-      return res.status(404).json({ error: "Donor not found" });
+    const deletedCurrentItem = await CurrentItems.findByIdAndDelete(id);
+    if (!deletedCurrentItem) {
+      return res.status(404).json({ error: "Item not found" });
     }
-    res.json({ message: "Donor deleted successfully" });
+    res.json({ message: "Item deleted successfully" });
   } catch (error) {
-    console.error("Error deleting donor:", error);
+    console.error("Error deleting Item:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+//....
+
+//ReleaseItems....
+
+export const addReleaseItem = async (req, res) => {
+  try {
+    const { eventid, itemId, date, quantity } = req.body;
+
+    // Create a new release item instance
+    const newReleaseItem = new ReleaseItems({
+      eventid,
+      itemId,
+      date,
+      quantity,
+    });
+
+    // Save the release item to the database
+    const savedReleaseItem = await newReleaseItem.save();
+
+    res.status(201).json(savedReleaseItem); // Respond with the saved release item
+  } catch (error) {
+    console.error("Error releasing new Item:", error);
+    res.status(500).json({ error: "Failed to release new Item" });
+  }
+};
+
+export const getReleaseItems = async (req, res) => {
+  try {
+    const ReleaseItems = await Items_out.find();
+    res.status(200).json(ReleaseItems);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export const getReleaseItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const releaseItems = await ReleaseItems.findById(id);
+    res.status(200).json(releaseItems);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export const deleteReleaseItems = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deletedReleaseItem = await ReleaseItems.findByIdAndDelete(id);
+    if (!deletedReleaseItem) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+    res.json({ message: "Item deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting Item:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+//....
 
 export const getDashboardStats = async (req, res) => {
   try {
