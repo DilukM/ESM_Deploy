@@ -29,7 +29,7 @@ const UpdateForm = ({ open, handleClose, refetch, donorToUpdate }) => {
     }
   }, [donorToUpdate]);
 
-  // const donorId = donorToUpdate ? donorToUpdate._id : "";
+  const donorId = donorToUpdate ? donorToUpdate._id : "";
 
   const handleUpdateDonor = () => {
     updateDonor({ donorToUpdate, name, email, phone, password })
