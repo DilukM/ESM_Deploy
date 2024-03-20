@@ -21,7 +21,7 @@ const UpdateForm = ({ open, handleClose, refetch, donorToUpdate }) => {
   const [updateDonor] = useUpdateDonorMutation();
   // Populate form fields with donorToUpdate data when it's available
   useEffect(() => {
-    if (donorToUpdate) {
+    if (donorToUpdate && donorToUpdate._id) {
       setName(donorToUpdate.name);
       setEmail(donorToUpdate.email);
       setPhone(donorToUpdate.phone);
