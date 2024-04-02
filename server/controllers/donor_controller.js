@@ -30,7 +30,7 @@ export const addDonor = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { donorId: newDonor._id },
-      process.env.JWT_SECRET_KEY,
+      "6474b13e42fd0f0c680c18ab4afa9fbca5e6e9584d98b3bc68617f0b5c8f4249",
       {
         expiresIn: "1h",
       }
@@ -58,9 +58,13 @@ export const donorLogin = async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ donorId: donor._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "1h", // Token expiration time
-    });
+    const token = jwt.sign(
+      { donorId: donor._id },
+      "6474b13e42fd0f0c680c18ab4afa9fbca5e6e9584d98b3bc68617f0b5c8f4249",
+      {
+        expiresIn: "1h", // Token expiration time
+      }
+    );
 
     res.json({ token });
   } catch (error) {
