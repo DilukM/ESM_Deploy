@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const ocrSchema = new mongoose.Schema(
   {
+    token_No: {
+      type: Number,
+      required: true,
+      unique: true,
+    },
     ID_Number: {
       type: String,
       required: true,
