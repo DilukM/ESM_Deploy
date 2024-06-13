@@ -12,8 +12,6 @@ import salesRoutes from "./routes/sales.js";
 import donorRoutes from "./routes/donor_routes.js";
 
 import dEventRoutes from "./routes/d_events_routes.js";
-import itemsRoutes from "./routes/items_routes.js";
-import items_outRoutes from "./routes/items_out_routes.js";
 
 /* CONFIGURATION */
 const app = express();
@@ -38,8 +36,7 @@ app.use("/management", managementRoutes);
 app.use("/sales", salesRoutes);
 app.use("/donors", donorRoutes);
 app.use("/donorevents", dEventRoutes);
-app.use("/items", itemsRoutes);
-app.use("/items_out", items_outRoutes);
+
 /* MONGOOSE SETUP */
 const PORT = 5000 || 9000;
 mongoose
