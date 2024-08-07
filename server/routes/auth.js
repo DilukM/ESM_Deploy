@@ -6,6 +6,7 @@ import { AdminUser } from "../models/admin.js";
 const router = Router();
 
 router.post("/signin", async (req, res) => {
+  console.log(req.body);
   try {
     // Validate request body
     const { error } = validate(req.body);
