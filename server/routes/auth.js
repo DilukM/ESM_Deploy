@@ -36,6 +36,7 @@ router.post("/signin", async (req, res) => {
       .status(200)
       .json({ data: { token, user }, message: "Logged in successfully" });
   } catch (error) {
+    console.log("Wada na ayyoo");
     console.error("Sign-in error:", error); // Log the error for debugging
     res.status(500).json({ message: "Internal Server Error" });
   }
