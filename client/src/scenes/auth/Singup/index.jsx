@@ -18,7 +18,8 @@ const Signup = ({ setOpen, handleSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = "http://localhost:5001/api/users";
+      const url =
+        "https://esm-deploy-server-m5o82f7pw-dilukms-projects.vercel.app/api/users";
       const { data: res } = await axios.post(url, data);
       handleSuccess();
       setOpen(false);

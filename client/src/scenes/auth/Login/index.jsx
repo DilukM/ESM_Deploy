@@ -14,7 +14,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = "http://localhost:5001/api/auth";
+      const url =
+        "https://esm-deploy-server-m5o82f7pw-dilukms-projects.vercel.app/api/auth";
       const { data: res } = await axios.post(url, data);
       localStorage.setItem("token", res.data);
       window.location = "/dashboard";
