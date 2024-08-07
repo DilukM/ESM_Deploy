@@ -68,9 +68,8 @@ mongoose
     }
   )
   .then(() => {
-    // Define a route for the root URL "/"
     app.get("/", (req, res) => {
-      res.send("Hello World!"); // Send a simple response
+      res.send("Hello World!");
     });
     app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
   })
