@@ -14,6 +14,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("button clicked");
     try {
       const res = await signIn(data).unwrap();
       localStorage.setItem("token", res.data.token);
