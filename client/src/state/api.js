@@ -29,6 +29,23 @@ export const api = createApi({
       providesTags: ["User"],
     }),
 
+    adminSignIn: build.mutation({
+      query: ({ email, password }) => ({
+        url: "auth/signin",
+        method: "POST",
+        body: { email, password },
+      }),
+    }),
+
+    // Signup endpoint
+    adminSignUp: build.mutation({
+      query: ({ name, email, phone, password }) => ({
+        url: "users/signup",
+        method: "POST",
+        body: { name, email, phone, password },
+      }),
+    }),
+
     getDonors: build.query({
       query: () => `donors/gets`,
       providesTags: ["Donors"],
@@ -344,4 +361,7 @@ export const {
   useGetAdminsQuery,
   useGetUserPerformanceQuery,
   useGetDashboardQuery,
+
+  useAdminSignInMutation,
+  useAdminSignUpMutation,
 } = api;

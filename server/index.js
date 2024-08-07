@@ -54,8 +54,8 @@ app.use("/sponsors", sponsors);
 // Serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/auth", authRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = 5000 || 9000;
