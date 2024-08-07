@@ -39,10 +39,18 @@ export const api = createApi({
 
     // Signup endpoint
     adminSignUp: build.mutation({
-      query: ({ name, email, phone, password }) => ({
+      query: ({ firstName, email, lastName, password }) => ({
         url: "users/signup",
         method: "POST",
-        body: { name, email, phone, password },
+        body: { firstName, email, lastName, password },
+      }),
+    }),
+
+    resetPassword: build.mutation({
+      query: ({ userId, password }) => ({
+        url: `/users/${userId}/resetPassword`,
+        method: "POST",
+        body: { password },
       }),
     }),
 
@@ -273,6 +281,62 @@ export const api = createApi({
       providesTags: ["Items"],
     }),
 
+    //...
+
+    //Items_out...
+
+    // getItemss_out: build.query({
+    //   query: () => `items_out/gets`,
+    //   providesTags: ["Items_out"],
+    // }),
+    // getItems_out: build.query({
+    //   query: (id) => `items_out/items_out/${id}`,
+    //   providesTags: ["Items_out"],
+    // }),
+    // deleteItems_out: build.mutation({
+    //   query: (itemID) => ({
+    //     url: `items_out/delete/${itemID}`,
+    //     method: "Delete",
+    //   }),
+    //   invalidatesTags: ["Items_out"], // Invalidate the cache for "Items" after deletion
+    // }),
+    // addItems_out: build.mutation({
+    //   query: ({ itemID, quantity, eventId, date }) => ({
+    //     url: `items_out/add`,
+    //     method: "POST",
+    //     body: { itemID, quantity, eventId, date },
+    //   }),
+    //   providesTags: ["Items_out"],
+    // }),
+    // updateItems_out: build.mutation({
+    //   query: ({ itemID, quantity, eventId, date }) => ({
+    //     url: `items_out/update/${itemID}`,
+    //     method: "PUT",
+    //     body: { itemID, quantity, eventId, date },
+    //   }),
+    //   providesTags: ["Items_out"],
+    // }),
+
+    //...
+
+    // getCurrentItems: build.query({
+    //   query: () => `general/currentItems`,
+    //   providesTags: ["CurrentItems"],
+    // }),
+    // getCurrentItem: build.query({
+    //   query: (id) => `general/currentItems/${id}`,
+    //   providesTags: ["CurrentItems"],
+    // }),
+
+    // getReleaseItems: build.query({
+    //   query: () => `general/releaseItems`,
+    //   providesTags: ["ReleaseItems"],
+    // }),
+    // getReleaseItem: build.query({
+    //   query: (id) => `general/releaseItems/${id}`,
+    //   providesTags: ["ReleaseItems"],
+    // }),
+
     getProducts: build.query({
       query: () => "client/products",
       providesTags: ["Products"],
@@ -309,6 +373,36 @@ export const api = createApi({
       query: () => "general/dashboard",
       providesTags: ["Dashboard"],
     }),
+
+    // deleteCurrentItems: build.mutation({
+    //   query: (itemId) => ({
+    //     url: `general/currentItems/${itemId}`,
+    //     method: "Delete",
+    //   }),
+    //   invalidatesTags: ["CurrentItems"], // Invalidate the cache for "Items" after deletion
+    // }),
+    // addCurrentItem: build.mutation({
+    //   query: () => ({
+    //     url: `general/currentItems`,
+    //     method: "post",
+    //   }),
+    //   providesTags: ["CurrentItems"],
+    // }),
+
+    // deleteReleaseItems: build.mutation({
+    //   query: (itemId) => ({
+    //     url: `general/releaseItems/${itemId}`,
+    //     method: "Delete",
+    //   }),
+    //   invalidatesTags: ["ReleaseItems"], // Invalidate the cache for "Items" after deletion
+    // }),
+    // addReleaseItem: build.mutation({
+    //   query: () => ({
+    //     url: `general/releaseItems`,
+    //     method: "post",
+    //   }),
+    //   providesTags: ["ReleaseItems"],
+    // }),
   }),
 });
 
@@ -339,6 +433,7 @@ export const {
   useUpdateSponsorMutation,
 
   useGetItemssQuery,
+  // useDeleteItemsMutation,
 
   useGetItemsQuery,
   useDeleteItemsMutation,
@@ -352,6 +447,9 @@ export const {
   useAddItems_outMutation,
   useUpdateItems_outMutation,
 
+  // useGetCurrentItemsQuery,
+  // useGetReleaseItemsQuery,
+
   useGetUserQuery,
   useGetProductsQuery,
   useGetCustomersQuery,
@@ -364,4 +462,14 @@ export const {
 
   useAdminSignInMutation,
   useAdminSignUpMutation,
+  useResetPasswordMutation,
+
+  // useDeleteCurrentItemsMutation,
+  // useDeleteReleaseItemsMutation,
+
+  // useGetCurrentItemQuery,
+  // useGetReleaseItemQuery,
+
+  // useAddCurrentItemMutation,
+  // useAddReleaseItemMutation,
 } = api;
