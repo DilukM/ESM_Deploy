@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
+import ocr_route from "./routes/ocr_routes.js";
 
 import helmet from "helmet";
 import morgan from "morgan";
@@ -36,6 +37,8 @@ app.use("/management", managementRoutes);
 app.use("/sales", salesRoutes);
 app.use("/donors", donorRoutes);
 app.use("/donorevents", dEventRoutes);
+app.use("/ocr", ocr_route);
+
 
 /* MONGOOSE SETUP */
 const PORT = 5000 || 9000;
