@@ -2,8 +2,7 @@ import mongoose from "mongoose";
 
 const ItemsSchema = new mongoose.Schema(
   {
-   
-    itemID: {
+    itemId: {
       type: String,
       required: true,
       min: 2,
@@ -14,19 +13,25 @@ const ItemsSchema = new mongoose.Schema(
       type: String,
       required: true,
       max: 50,
-      
     },
-    points: {
+    quantity: {
       type: String,
       required: true,
-      unique: true,
+      max: 50,
     },
-    type: {
+
+    donorId: {
       type: String,
       required: true,
-      min: 8,
+      unique: false,
     },
-   
+
+    date: {
+      type: Date,
+      required: false,
+      min: 2,
+      default: null,
+    },
   },
   { timestamps: true }
 );
