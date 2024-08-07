@@ -11,9 +11,13 @@ const adminUserSchema = new mongoose.Schema({
 });
 
 adminUserSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  const token = jwt.sign(
+    { _id: this._id },
+    "6474b13e42fd0f0c680c18ab4afa9fbca5e6e9584d98b3bc68617f0b5c8f4249",
+    {
+      expiresIn: "7d",
+    }
+  );
   return token;
 };
 

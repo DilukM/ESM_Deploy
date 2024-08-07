@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 
 import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
@@ -22,7 +21,6 @@ import treeplantation from "./routes/treeplantation.js";
 import sponsors from "./routes/sponsors.js";
 
 /* CONFIGURATION */
-dotenv.config();
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
