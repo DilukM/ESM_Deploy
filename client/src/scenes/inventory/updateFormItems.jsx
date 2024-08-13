@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -9,12 +9,11 @@ import {
   DialogTitle,
   useTheme,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useAddItemsMutation } from "state/api";
 
-const Items = ({ open, handleClose, refetch }) => {
+import { useUpdateItemsMutation } from "state/api";
+
+const UpdateFormCI = ({ open, handleClose, refetch, itemsToUpdate }) => {
   const theme = useTheme();
-
   const [itemName, setitemName] = useState("");
   const [unit, setunit] = useState("");
   const [unitScore, setunitScore] = useState("");
@@ -24,12 +23,22 @@ const Items = ({ open, handleClose, refetch }) => {
   const [unitError, setunitError] = useState("");
   const [unitScoreError, setunitScoreError] = useState("");
 
-  const [addItem] = useAddItemsMutation();
+  const [updateItems] = useUpdateItemsMutation();
+  // Populate form fields with donorToUpdate data when it's available
+  useEffect(() => {
+    if (itemsToUpdate) {
+      setitemName(itemsToUpdate.itemName);
+      setunit(itemsToUpdate.unit);
+      setunitScore(itemsToUpdate.unitScore);
+    }
+  }, [itemsToUpdate]);
+
+  const itemID = itemsToUpdate ? itemsToUpdate._id : "";
 
   const validateInputs = () => {
     let isValid = true;
 
-    // Validate itemName
+    // Validate itemID
     if (!itemName.trim()) {
       setitemNameError("Item Name is required");
       isValid = false;
@@ -45,9 +54,9 @@ const Items = ({ open, handleClose, refetch }) => {
       setunitError("");
     }
 
-    // Validate donorId
-    if (!unitScore.trim()) {
-      setunitScoreError("Unit Score is required");
+    // Validate date
+    if (unitScore == null || unitScore == "") {
+      setunitScoreError("Unit score is required");
       isValid = false;
     } else {
       setunitScoreError("");
@@ -56,40 +65,29 @@ const Items = ({ open, handleClose, refetch }) => {
     return isValid;
   };
 
-  const handleAddItems = async () => {
+  const handleUpdateItems = () => {
     if (validateInputs()) {
-      try {
-        const response = await addItem({
-          itemName,
-          unit,
-          unitScore,
-        }).unwrap(); // Unwrap the response to handle it directly
+      updateItems({ itemID, itemName, unit, unitScore })
+        .then((response) => {
+          console.log("Item updated successfully:", response);
+          // Clear form fields
+          setitemName("");
+          setunit("");
+          setunitScore("");
 
-        console.log("Item added successfully from backend:", response);
-
-        // Clear form fields
-        setitemName("");
-        setunit("");
-        setunitScore("");
-
-        // Close the dialog
-        handleClose();
-        // Refetch the  list
-        refetch();
-      } catch (error) {
-        if (error?.data?.error) {
-          console.error("Error adding item:", error.data.error);
-          setitemNameError(error.data.error);
-        } else {
-          console.error("An unknown error occurred:", error);
-        }
-      }
+          // Close the dialog
+          handleClose();
+          // Refetch the donors list
+          refetch();
+        })
+        .catch((error) => {
+          console.error("Error updating item:", error);
+        });
     }
   };
 
   const handleCancel = () => {
     // Clear form fields
-
     setitemName("");
     setunit("");
     setunitScore("");
@@ -102,14 +100,10 @@ const Items = ({ open, handleClose, refetch }) => {
     handleClose();
   };
 
-  // const togglePasswordVisibility = () => {
-  //   setShowPassword(!showPassword);
-  // };
-
   return (
     <Dialog open={open} onClose={handleCancel}>
       <DialogTitle align="center" sx={{ fontWeight: 700 }}>
-        Add New Item
+        Update Item
       </DialogTitle>
       <DialogContent>
         <TextField
@@ -146,7 +140,6 @@ const Items = ({ open, handleClose, refetch }) => {
             },
           }}
         />
-
         <TextField
           label="Unit Score"
           value={unitScore}
@@ -177,8 +170,12 @@ const Items = ({ open, handleClose, refetch }) => {
             },
           }}
         >
-          <Button variant="contained" color="primary" onClick={handleAddItems}>
-            Add
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleUpdateItems}
+          >
+            Update
           </Button>
         </Box>
         <Box
@@ -200,4 +197,4 @@ const Items = ({ open, handleClose, refetch }) => {
   );
 };
 
-export default Items;
+export default UpdateFormCI;

@@ -1,21 +1,16 @@
-import Items from "../models/Items.js";
+import Items from "../models/Items_In.js";
 
-export const addItem = async (req, res) => {
-  const { itemName, unit, unitScore } = req.body;
+export const addItem_in = async (req, res) => {
+  const { itemName, itemId, quantity, donorId, donorName, date } = req.body;
   try {
-    // Check if the item already exists
-    const existingItem = await Items.findOne({ itemName });
-
-    // If item exists, send error response
-    if (existingItem) {
-      return res.status(400).json({ error: "Item already exists" });
-    }
-
     // Create a new donor instance with hashed password
     const newItem = new Items({
+      itemId,
       itemName,
-      unit,
-      unitScore,
+      quantity,
+      donorId,
+      donorName,
+      date,
     });
 
     // Save the item to the database
@@ -32,7 +27,7 @@ export const addItem = async (req, res) => {
   }
 };
 
-export const getItems = async (req, res) => {
+export const getItems_in = async (req, res) => {
   try {
     const items = await Items.find();
     res.status(200).json(items);
@@ -41,7 +36,7 @@ export const getItems = async (req, res) => {
   }
 };
 
-export const getItem = async (req, res) => {
+export const getItem_in = async (req, res) => {
   try {
     const { id } = req.params;
     const items = await Items.findById(id);
@@ -51,7 +46,7 @@ export const getItem = async (req, res) => {
   }
 };
 
-export const deleteItems = async (req, res) => {
+export const deleteItems_in = async (req, res) => {
   const { id } = req.params;
   try {
     const deletedItem = await Items.findByIdAndDelete(id);
@@ -65,7 +60,7 @@ export const deleteItems = async (req, res) => {
   }
 };
 
-export const updateItems = async (req, res) => {
+export const updateItems_in = async (req, res) => {
   try {
     const itemID = req.params.id;
     const updatedItemData = req.body; // Updated item data from the request body

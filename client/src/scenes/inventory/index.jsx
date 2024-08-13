@@ -1,30 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Box, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useGetTransactionsQuery } from "state/api";
+
 import Header from "components/Header";
-import {
-  useGetItemsQuery,
-  useDeleteItemsMutation,
-  useDeleteItems_outMutation,
-} from "state/api";
+import { useGetItemsQuery, useDeleteItemsMutation } from "state/api";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 
-import {
-  Avatar,
-  Button,
-  Tab,
-  Tabs,
-  Typography,
-  Modal,
-  TextField,
-} from "@mui/material";
+import { Button, Tab, Tabs } from "@mui/material";
 import { Link } from "react-router-dom";
-import DonorEvents from "./donorEvents";
-import UpdateFormCI from "./updateFormCI";
-import UpdateFormRI from "./updateFormRI";
+import DonorEvents from "../donors/donorEvents";
+import UpdateFormCI from "./updateFormItems";
 import Items from "./Items";
-import Items_out from "./Items_out";
+import Overview from "./overview";
+import IncomingDonations from "./incomingDonations";
+import OutgoingDonations from "./outgoingDonations";
 
 const Inventory = () => {
   const theme = useTheme();
@@ -32,11 +21,9 @@ const Inventory = () => {
   const [showUpdateFormCI, setShowUpdateFormCI] = useState(false);
   const [showUpdateFormRI, setShowUpdateFormRI] = useState(false);
   const [selectedItems, setSelectedItems] = useState(null);
-  //const [selectedItems_out, setSelectedItems_out] = useState(null);
 
   // values to be sent to the backend
   const [deleteItems] = useDeleteItemsMutation();
-  // const [deleteItems_out] = useDeleteItems_outMutation();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [setSort] = useState({});
@@ -58,13 +45,13 @@ const Inventory = () => {
       setRowIndex(0); // Reset the index when data changes
     }
   }, [data]);
+
   //items
   const handleDelete = (itemID) => {
     deleteItems(itemID)
       .unwrap()
       .then((response) => {
         console.log("item deleted successfully");
-        // Optionally, you can trigger a refetch of the donors list
       })
       .catch((error) => {
         console.error("Error deleting item:", error);
@@ -76,134 +63,31 @@ const Inventory = () => {
     setShowUpdateFormCI(true); // Show the update form
   };
 
-  // const handleUpdateClickRI = (item_out) => {
-  //   setSelectedItems_out(item_out); // Set the selected donor data
-  //   setShowUpdateFormRI(true); // Show the update form
-  // };
-
   const handleCloseForm = () => {
     setShowForm(false);
     setShowUpdateFormCI(false);
   };
 
-  const handleCloseFormRI = () => {
-    setShowForm(false);
-    setShowUpdateFormRI(false);
-  };
-
-  const generateRowsWithIndex = (rows) => {
-    return rows.map((row, index) => ({ ...row, index: rowIndex + index + 1 }));
-  };
-
-  const overview = [
-    {
-      field: "eventid",
-      headerName: "Event ID",
-      flex: 1,
-    },
-
-    {
-      field: "itemId",
-      headerName: "Item ID",
-      flex: 1,
-    },
-    {
-      field: "date",
-      headerName: "Date",
-      flex: 1,
-    },
-    {
-      field: "quantity",
-      headerName: "Quantity",
-      flex: 0.5,
-      sortable: false,
-    },
-    {
-      field: "donorId",
-      headerName: "Donor Id",
-      flex: 1,
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box display="flex" justifyContent="space-around">
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            mr={2}
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.secondary[400],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => handleDelete(params.row._id)}
-            >
-              Delete
-            </Button>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.primary[700],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="info"
-              onClick={() => setShowUpdateFormCI(true)}
-            >
-              Update
-            </Button>
-          </Box>
-        </Box>
-      ),
-    },
-  ];
-
   const items = [
     {
-      field: "itemId",
-      headerName: "Item ID",
-      flex: 1,
-    },
-
-    {
       field: "itemName",
       headerName: "Item Name",
       flex: 1,
     },
     {
-      field: "quantity",
-      headerName: "Quantity",
+      field: "unit",
+      headerName: "Unit",
       flex: 0.5,
       sortable: false,
     },
     {
-      field: "donorId",
-      headerName: "Donor ID",
-      flex: 1,
-    },
-    {
-      field: "date",
-      headerName: "Date",
+      field: "unitScore",
+      headerName: "Unit Score",
       flex: 1,
     },
 
     {
-      field: "",
+      field: " ",
       headerName: "Actions",
       flex: 1,
       sortable: false,
@@ -242,159 +126,11 @@ const Inventory = () => {
             <Button
               variant="contained"
               color="info"
-              onClick={() => handleUpdateClick(true)}
+              onClick={() => handleUpdateClick(params.row)}
             >
               Update
             </Button>
           </Box>
-        </Box>
-      ),
-    },
-  ];
-
-  const currentItems = [
-    {
-      field: "itemId",
-      headerName: "Item ID",
-      flex: 1,
-    },
-
-    {
-      field: "itemName",
-      headerName: "Item Name",
-      flex: 1,
-    },
-    {
-      field: "quantity",
-      headerName: "Quantity",
-      flex: 0.5,
-      sortable: false,
-    },
-    {
-      field: "date",
-      headerName: "Date",
-      flex: 1,
-    },
-
-    {
-      field: "",
-      headerName: "Actions",
-      flex: 1,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box display="flex" justifyContent="space-around">
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            mr={2}
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.secondary[400],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => handleDelete(params.row._id)}
-            >
-              Delete
-            </Button>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.primary[700],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="info"
-              onClick={() => setShowUpdateFormCI(true)}
-            >
-              Update
-            </Button>
-          </Box>
-        </Box>
-      ),
-    },
-  ];
-
-  const releaseItems = [
-    {
-      field: "itemID",
-      headerName: "Item ID",
-      flex: 1,
-    },
-
-    {
-      field: "quantity",
-      headerName: "Quantity",
-      flex: 1,
-    },
-    {
-      field: "eventId",
-      headerName: "Event Id",
-      flex: 1,
-    },
-    {
-      field: "date",
-      headerName: "Date",
-      flex: 0.5,
-      sortable: false,
-    },
-
-    {
-      field: "",
-      headerName: "Actions",
-      flex: 1,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box display="flex" justifyContent="space-around">
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            mr={2}
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.secondary[400],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => handleDelete(params.row._id)}
-            >
-              Delete
-            </Button>
-          </Box>
-          {/* <Box
-            display="flex"
-            justifyContent="flex-end"
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.primary[700],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="info"
-              onClick={() => setShowUpdateFormCI(true)}
-            >
-              Update
-            </Button>
-          </Box> */}
         </Box>
       ),
     },
@@ -416,86 +152,92 @@ const Inventory = () => {
       >
         <Tab label="OverView" />
         <Tab label="Items" />
-        <Tab label="Current Items" />
-        <Tab label="Release Items" />
+        <Tab label="Incomming Donations" />
+        <Tab label="Outgoing Donations" />
         <Tab label="Events" />
       </Tabs>
 
       {activeTab === 0 && (
-        <Box>
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            mb={2}
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.secondary[400],
-                color: "white",
-              },
-            }}
-          >
-            <Link to="generatereport">
-              <Button variant="contained" sx={{ marginTop: 2 }}>
-                Generate Report
-              </Button>
-            </Link>
-          </Box>
+        <Overview
+          data={data}
+          isLoading={isLoading}
+          page={page}
+          setPage={setPage}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          setSort={setSort}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          setSearch={setSearch}
+        />
+        // <Box>
+        //   <Box
+        //     display="flex"
+        //     justifyContent="flex-end"
+        //     mb={2}
+        //     sx={{
+        //       "& button": {
+        //         backgroundColor: theme.palette.secondary[400],
+        //         color: "white",
+        //       },
+        //     }}
+        //   >
+        //     <Link to="generatereport">
+        //       <Button variant="contained" sx={{ marginTop: 2 }}>
+        //         Generate Report
+        //       </Button>
+        //     </Link>
+        //   </Box>
 
-          <UpdateFormCI
-            open={showUpdateFormCI}
-            handleClose={handleCloseForm}
-            refetch={refetch}
-          />
-
-          <Box
-            height="80vh"
-            sx={{
-              "& .MuiDataGrid-root": {
-                border: "none",
-              },
-              "& .MuiDataGrid-cell": {
-                borderBottom: "none",
-              },
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: theme.palette.background.alt,
-                color: theme.palette.secondary[100],
-                borderBottom: "none",
-              },
-              "& .MuiDataGrid-virtualScroller": {
-                backgroundColor: theme.palette.primary.light,
-              },
-              "& .MuiDataGrid-footerContainer": {
-                backgroundColor: theme.palette.background.alt,
-                color: theme.palette.secondary[100],
-                borderTop: "none",
-              },
-              "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                color: `${theme.palette.secondary[200]} !important`,
-              },
-            }}
-          >
-            <DataGrid
-              loading={isLoading || !data}
-              getRowId={(row) => row._id}
-              rows={data || []}
-              columns={overview}
-              rowCount={(data && data.total) || 0}
-              rowsPerPageOptions={[20, 50, 100]}
-              pagination
-              page={page}
-              pageSize={pageSize}
-              paginationMode="server"
-              sortingMode="server"
-              onPageChange={(newPage) => setPage(newPage)}
-              onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-              onSortModelChange={(newSortModel) => setSort(...newSortModel)}
-              components={{ Toolbar: DataGridCustomToolbar }}
-              componentsProps={{
-                toolbar: { searchInput, setSearchInput, setSearch },
-              }}
-            />
-          </Box>
-        </Box>
+        //   <Box
+        //     height="80vh"
+        //     sx={{
+        //       "& .MuiDataGrid-root": {
+        //         border: "none",
+        //       },
+        //       "& .MuiDataGrid-cell": {
+        //         borderBottom: "none",
+        //       },
+        //       "& .MuiDataGrid-columnHeaders": {
+        //         backgroundColor: theme.palette.background.alt,
+        //         color: theme.palette.secondary[100],
+        //         borderBottom: "none",
+        //       },
+        //       "& .MuiDataGrid-virtualScroller": {
+        //         backgroundColor: theme.palette.primary.light,
+        //       },
+        //       "& .MuiDataGrid-footerContainer": {
+        //         backgroundColor: theme.palette.background.alt,
+        //         color: theme.palette.secondary[100],
+        //         borderTop: "none",
+        //       },
+        //       "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+        //         color: `${theme.palette.secondary[200]} !important`,
+        //       },
+        //     }}
+        //   >
+        //     <DataGrid
+        //       loading={isLoading || !data}
+        //       getRowId={(row) => row._id}
+        //       rows={data || []}
+        //       columns={overview}
+        //       rowCount={(data && data.total) || 0}
+        //       rowsPerPageOptions={[20, 50, 100]}
+        //       pagination
+        //       page={page}
+        //       pageSize={pageSize}
+        //       paginationMode="server"
+        //       sortingMode="server"
+        //       onPageChange={(newPage) => setPage(newPage)}
+        //       onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+        //       onSortModelChange={(newSortModel) => setSort(...newSortModel)}
+        //       components={{ Toolbar: DataGridCustomToolbar }}
+        //       componentsProps={{
+        //         toolbar: { searchInput, setSearchInput, setSearch },
+        //       }}
+        //     />
+        //   </Box>
+        // </Box>
       )}
 
       {activeTab === 1 && (
@@ -524,7 +266,7 @@ const Inventory = () => {
             open={showUpdateFormCI}
             handleClose={handleCloseForm}
             refetch={refetch}
-            itemToUpdate={selectedItems}
+            itemsToUpdate={selectedItems}
           />
 
           <Items
@@ -584,366 +326,11 @@ const Inventory = () => {
         </Box>
       )}
 
-      {activeTab === 2 && (
-        <Box>
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            mb={2}
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.secondary[400],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{ marginTop: 2 }}
-              onClick={() => setShowForm(true)}
-            >
-              Add Item
-            </Button>
-          </Box>
+      {activeTab === 2 && <IncomingDonations />}
 
-          <UpdateFormCI
-            open={showUpdateFormCI}
-            handleClose={handleCloseForm}
-            refetch={refetch}
-            itemToUpdate={selectedItems}
-          />
+      {activeTab === 3 && <OutgoingDonations />}
 
-          <Items
-            open={showForm}
-            handleClose={handleCloseForm}
-            refetch={refetch}
-          />
-
-          {/* <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 800,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <h2 id="modal-modal-title">Add Item</h2>
-
-          <TextField
-            label="Item Name"
-            variant="outlined"
-            name="itemName"
-            value={addItem.itemName}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Item Id"
-            variant="outlined"
-            name="itemId"
-            value={addItem.itemId}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Donor Id"
-            variant="outlined"
-            name="donorId"
-            value={addItem.donorId}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Item Quantity"
-            variant="outlined"
-            name="itemQuantity"
-            value={addItem.itemQuantity}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Date"
-            type="date"
-            variant="outlined"
-            name="date"
-            value={addItem.date}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          
-
-          <Button variant="contained" onClick={handleAddItem} sx={{ m: 2 }}>
-            Add 
-          </Button>
-          <Button variant="contained" onClick={handleAddItem}>
-            close
-          </Button>
-        </Box>
-      </Modal> */}
-
-          <Box
-            height="80vh"
-            sx={{
-              "& .MuiDataGrid-root": {
-                border: "none",
-              },
-              "& .MuiDataGrid-cell": {
-                borderBottom: "none",
-              },
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: theme.palette.background.alt,
-                color: theme.palette.secondary[100],
-                borderBottom: "none",
-              },
-              "& .MuiDataGrid-virtualScroller": {
-                backgroundColor: theme.palette.primary.light,
-              },
-              "& .MuiDataGrid-footerContainer": {
-                backgroundColor: theme.palette.background.alt,
-                color: theme.palette.secondary[100],
-                borderTop: "none",
-              },
-              "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                color: `${theme.palette.secondary[200]} !important`,
-              },
-            }}
-          >
-            <DataGrid
-              loading={isLoading || !data}
-              getRowId={(row) => row._id}
-              rows={generateRowsWithIndex(data || [])}
-              columns={currentItems}
-              rowCount={(data && data.total) || 0}
-              rowsPerPageOptions={[20, 50, 100]}
-              pagination
-              page={page}
-              pageSize={pageSize}
-              paginationMode="server"
-              sortingMode="server"
-              onPageChange={(newPage) => setPage(newPage)}
-              onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-              onSortModelChange={(newSortModel) => setSort(...newSortModel)}
-              components={{ Toolbar: DataGridCustomToolbar }}
-              componentsProps={{
-                toolbar: { searchInput, setSearchInput, setSearch },
-              }}
-            />
-          </Box>
-        </Box>
-      )}
-
-      {activeTab === 3 && (
-        <Box>
-          <Box
-            display="flex"
-            flex={1}
-            justifyContent="flex-end"
-            mb={2}
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.secondary[400],
-                color: "white",
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{ marginTop: 2 }}
-              onClick={() => setShowForm(true)}
-            >
-              Release Item
-            </Button>
-          </Box>
-
-          <UpdateFormRI
-            open={showUpdateFormRI}
-            handleClose={handleCloseForm}
-            refetch={refetch}
-            itemToUpdate={selectedItems}
-          />
-
-          <Items_out
-            open={showForm}
-            handleClose={handleCloseForm}
-            refetch={refetch}
-          />
-
-          <Box
-            display="flex"
-            flex={1}
-            justifyContent="flex-end"
-            mb={2}
-            sx={{
-              "& button": {
-                backgroundColor: theme.palette.secondary[400],
-                color: "white",
-              },
-            }}
-          >
-            {/* <Button
-          variant="contained"
-          sx={{ marginTop: 2 }}
-          onClick={handleOpenModal}
-        >
-         Release Item
-        </Button> */}
-          </Box>
-
-          <UpdateFormCI
-            open={showUpdateFormCI}
-            handleClose={handleCloseForm}
-            refetch={refetch}
-          />
-
-          {/* <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 800,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <h2 id="modal-modal-title">Release Item</h2>
-          <TextField
-            label="Item Name"
-            variant="outlined"
-            name="itemName"
-            value={releaseItem.itemName}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Item Id"
-            variant="outlined"
-            name="itemId"
-            value={releaseItem.itemId}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Event Id"
-            variant="outlined"
-            name="eventId"
-            value={releaseItem.eventId}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Item Quantity"
-            variant="outlined"
-            name="itemQuantity"
-            value={releaseItem.itemQuantity}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Date"
-            type="date"
-            variant="outlined"
-            name="date"
-            value={releaseItem.date}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          
-
-          <Button variant="contained" onClick={handleReleaseItem} sx={{ m: 2 }}>
-            Release
-          </Button>
-          <Button variant="contained" onClick={handleReleaseItem}>
-            close
-          </Button>
-        </Box>
-      </Modal> */}
-
-          <Box
-            height="80vh"
-            sx={{
-              "& .MuiDataGrid-root": {
-                border: "none",
-              },
-              "& .MuiDataGrid-cell": {
-                borderBottom: "none",
-              },
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: theme.palette.background.alt,
-                color: theme.palette.secondary[100],
-                borderBottom: "none",
-              },
-              "& .MuiDataGrid-virtualScroller": {
-                backgroundColor: theme.palette.primary.light,
-              },
-              "& .MuiDataGrid-footerContainer": {
-                backgroundColor: theme.palette.background.alt,
-                color: theme.palette.secondary[100],
-                borderTop: "none",
-              },
-              "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                color: `${theme.palette.secondary[200]} !important`,
-              },
-            }}
-          >
-            <DataGrid
-              loading={isLoading || !data}
-              getRowId={(row) => row._id}
-              rows={data || []}
-              columns={releaseItems}
-              rowCount={(data && data.total) || 0}
-              rowsPerPageOptions={[20, 50, 100]}
-              pagination
-              page={page}
-              pageSize={pageSize}
-              paginationMode="server"
-              sortingMode="server"
-              onPageChange={(newPage) => setPage(newPage)}
-              onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-              onSortModelChange={(newSortModel) => setSort(...newSortModel)}
-              components={{ Toolbar: DataGridCustomToolbar }}
-              componentsProps={{
-                toolbar: { searchInput, setSearchInput, setSearch },
-              }}
-            />
-          </Box>
-        </Box>
-      )}
-
-      {activeTab === 4 && (
-        <Box>
-          <DonorEvents />
-        </Box>
-      )}
+      {activeTab === 4 && <DonorEvents />}
     </Box>
   );
 };
