@@ -19,6 +19,7 @@ import userRoutes from "./routes/users.js";
 import authRoutes from "./routes/auth.js";
 import treeplantation from "./routes/treeplantation.js";
 import sponsors from "./routes/sponsors.js";
+import ocr from "./routes/ocr_routes.js";
 
 /* CONFIGURATION */
 const app = express();
@@ -50,6 +51,7 @@ app.use("/items", itemsRoutes);
 app.use("/items_out", items_outRoutes);
 app.use("/treePlantationEvent", treeplantation);
 app.use("/sponsors", sponsors);
+app.use("/ocr", ocr);
 
 // Serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
