@@ -30,7 +30,7 @@ export const addDonor = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { donorId: newDonor._id },
-      "6474b13e42fd0f0c680c18ab4afa9fbca5e6e9584d98b3bc68617f0b5c8f4249",
+      process.env.JWT_SECRET_KEY,
       {
         expiresIn: "1h",
       }
@@ -72,10 +72,18 @@ export const donorLogin = async (req, res) => {
     res.status(500).json({ message: "Login failed. Please try again later." });
   }
 };
-
 export const getDonors = async (req, res) => {
   try {
     const donors = await Donors.find();
+    res.status(200).json(donors);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export const getLeaderboard = async (req, res) => {
+  try {
+    const donors = await Donors.find().sort({ score: -1 });
     res.status(200).json(donors);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -122,5 +130,24 @@ export const updateDonors = async (req, res) => {
   } catch (error) {
     console.error("Error updating donor:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const user = await Donors.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).send({ message: "Donor not found" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+
+    await user.save();
+    res.status(200).send({ message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).send({ message: "Server error" });
   }
 };

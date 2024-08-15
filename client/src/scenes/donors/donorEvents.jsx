@@ -10,41 +10,30 @@ import {
 } from "@mui/material";
 
 import { DataGrid } from "@mui/x-data-grid";
-import Header from "components/Header";
+import EventUpdateForm from "./dEventUpdate";
 import {
   useAddDEventMutation,
   useGetDEventsQuery,
-  useDeleteDEventMutation,
+  useDeleteDEventMutation,useUpdateDEventMutation
 } from "state/api";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { storage } from "../../firebase.js";
 
-function TabPanel({ value, index, children }) {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`tabpanel-${index}`}
-      aria-labelledby={`tab-${index}`}
-    >
-      {value === index && <Box p={3}>{children}</Box>}
-    </div>
-  );
-}
+
 
 export default function DonorEvents() {
   const theme = useTheme();
   const [isHoveredBtn, setIsHoveredBtn] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [openModal, setOpenModal] = useState(false);
-  // const [cover, setCover] = useState();
 
-  const [eventDetails, setEventDetails] = useState({
-    id: "",
-    eventName: "",
-    date: "",
-    location: "",
-    description: "",
-    cover: "NULL",
-  });
+  const [eventName, setEventName] = useState("");
+  const [date, setDate] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [cover, setCover] = useState("NULL");
+  
 
   const [addDEvent] = useAddDEventMutation();
   const { data, isLoading, refetch } = useGetDEventsQuery();
@@ -53,37 +42,51 @@ export default function DonorEvents() {
   const [selectedDEvent, setSelectedDEvent] = useState(null);
 
   const [deleteDEvent] = useDeleteDEventMutation();
-  const handleMouseEnterBtn = () => {
-    setIsHoveredBtn(true);
-    setTabValue(0);
-  };
+  const [alertState, setAlertState] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-  const handleMouseLeaveBtn = () => {
-    setIsHoveredBtn(false);
+  const handleSuccessUpdate = () => {
+    setAlertState({
+      open: true,
+      message: "Donor Updated successfully!",
+      severity: "success",
+    });
+    refetch();
+    setTimeout(() => {
+      setAlertState({ ...alertState, open: false });
+    }, 3000);
   };
+  
+
+
+  useEffect(() => {
+    if (data) {
+      setRowIndex(0); // Reset the index when data changes
+    }
+  }, [data]);
 
   const handleOpenModal = () => {
     setOpenModal(true);
   };
 
   const handleCloseModal = () => {
+    setCover("");
+
+    setEventName("");
+    setDate("");
+    setLocation("");
+    setDescription("");
     setOpenModal(false);
+ 
+    
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEventDetails((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const handleCloseForm = () => {
 
-  const handleFileInputChange = (e) => {
-    const file = e.target.files[0];
-    setEventDetails((prev) => ({
-      ...prev,
-      cover: file,
-    }));
+    setShowUpdateForm(false);
   };
 
   const handleDelete = (donorId) => {
@@ -97,17 +100,64 @@ export default function DonorEvents() {
       });
   };
 
-  const handleUpdateClick = (donor) => {
-    setSelectedDEvent(donor); // Set the selected donor data
-    setShowUpdateForm(true); // Show the update form
+ const handleUpdateClick = (donor) => {
+  setSelectedDEvent(donor); // Set the selected donor data
+    setShowUpdateForm(true);
+};
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setEventDetails((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const storageRef = ref(storage, `donorEvents/${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setProgress(progress);
+      },
+      (error) => {
+        console.error("Error uploading file:", error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setCover(downloadURL);
+        });
+      }
+    );
   };
 
   const handleCreateEvent = () => {
-    addDEvent({ eventDetails })
+    addDEvent({ eventName, location, date, description, cover })
       .then((response) => {
-        console.log("Event added successfully from frontend:", response);
+        console.log(
+          "Event added successfully from frontend:",
+
+          eventName,
+          location,
+          date,
+          description,
+          cover,
+          response
+        );
         // Clear form fields
-        setEventDetails("");
+        setCover("");
+
+        setEventName("");
+        setDate("");
+        setLocation("");
+        setDescription("");
         // Close the dialog
         handleCloseModal();
         // Refetch the event list
@@ -125,7 +175,7 @@ export default function DonorEvents() {
       width: 200,
       renderCell: (params) => (
         <div>
-          <div>{params.row.id}</div> {/* Display Event ID */}
+          {/* cd client */}
           <img
             src={params.value}
             alt="Cover"
@@ -134,13 +184,13 @@ export default function DonorEvents() {
         </div>
       ),
     },
-    { field: "eventName", headerName: "Event", width: 200 },
-    { field: "date", headerName: "Date", width: 150 },
-    { field: "location", headerName: "Location", width: 200 },
-    { field: "description", headerName: "Description", width: 200 },
+    { field: "eventName", headerName: "Event", flex: 1 },
+    { field: "date", headerName: "Date", flex: 1 },
+    { field: "location", headerName: "Location", flex: 1 },
+    { field: "description", headerName: "Description", flex: 1 },
     {
       field: "actions",
-      headerName: "Actions",
+      headerName: " ",
       flex: 1,
       sortable: false,
       filterable: false,
@@ -211,20 +261,21 @@ export default function DonorEvents() {
         </Button>
       </Box>
       <Box mt={2}>
-        <Box height="80vh" position={"relative"}>
+        <Box height="80vh">
           <DataGrid
             loading={isLoading || !data}
-            getRowId={(row) => row.id}
+            getRowId={(row) => row._id}
             rows={data || []}
             columns={columns1}
             pageSize={5}
             rowCount={(data && data.total) || 0}
-            checkboxSelection
-            disableSelectionOnClick
+            // checkboxSelection
+
             getRowHeight={() => 150}
           />
         </Box>
       </Box>
+      
       <Modal
         open={openModal}
         onClose={handleCloseModal}
@@ -245,21 +296,13 @@ export default function DonorEvents() {
           }}
         >
           <h2 id="modal-modal-title">Create New Event</h2>
-          <TextField
-            label="Event ID"
-            variant="outlined"
-            name="id"
-            value={eventDetails.id}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
+
           <TextField
             label="Event Name"
             variant="outlined"
             name="eventName"
-            value={eventDetails.eventName}
-            onChange={handleInputChange}
+            value={eventName}
+            onChange={(e) => setEventName(e.target.value)}
             fullWidth
             sx={{ mb: 2 }}
           />
@@ -267,33 +310,28 @@ export default function DonorEvents() {
             type="date"
             variant="outlined"
             name="date"
-            value={eventDetails.date}
-            onChange={handleInputChange}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
             fullWidth
             sx={{ mb: 2 }}
           />
-          <Box
-            display="flex"
-            flexDirection="row"
-            alignItems="center"
+
+          <TextField
+            label="Location"
+            variant="outlined"
+            name="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            fullWidth
             sx={{ mb: 2 }}
-          >
-            <Box mr={2}>
-              <TextField
-                label="Location"
-                variant="outlined"
-                name="location"
-                value={eventDetails.location}
-                onChange={handleInputChange}
-              />
-            </Box>
-          </Box>
+          />
+
           <TextField
             label="Description"
             variant="outlined"
             name="description"
-            value={eventDetails.description}
-            onChange={handleInputChange}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             fullWidth
             multiline
             rows={4}
@@ -303,20 +341,29 @@ export default function DonorEvents() {
             type="file"
             variant="outlined"
             name="coverImage"
-            onChange={handleInputChange}
+            onChange={handleFileInputChange}
             fullWidth
             sx={{ mb: 2 }}
             rows={4}
           />
 
+          <progress value={progress} max="100" style={{ width: "100%" }} />
           <Button variant="contained" onClick={handleCreateEvent} sx={{ m: 2 }}>
             Create
           </Button>
           <Button variant="contained" onClick={handleCloseModal}>
-            close
+            Close
           </Button>
         </Box>
       </Modal>
+      <EventUpdateForm
+            open={showUpdateForm}
+            handleClose={handleCloseForm}
+            refetch={refetch}
+            eventToUpdate={selectedDEvent}
+            handleSuccess={handleSuccessUpdate}
+            setAlertState={setAlertState}
+          />
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -9,43 +9,93 @@ import {
   DialogTitle,
   useTheme,
 } from "@mui/material";
-import { useAddCurrentItemMutation } from "state/api";
 
-const UpdateFormCI = ({ open, handleClose, refetch }) => {
+import { useUpdateItemsMutation } from "state/api";
+
+const UpdateFormCI = ({ open, handleClose, refetch, itemsToUpdate }) => {
   const theme = useTheme();
-  const [itemId, setItemId] = useState("");
-  const [itemName, setItemName] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [date, setDate] = useState("");
+  const [itemName, setitemName] = useState("");
+  const [quantity, setquantity] = useState("");
+  const [date, setdate] = useState("");
 
-  const [addCurrentItem] = useAddCurrentItemMutation();
+  // State variables for validation
+  const [itemNameError, setitemNameError] = useState("");
+  const [quantityError, setquantityError] = useState("");
+  const [dateError, setdateError] = useState("");
 
-  const handleUpdateCurrentItem = () => {
-    addCurrentItem({ itemId, itemName, quantity, date })
-      .unwrap()
-      .then((response) => {
-        console.log("Item Updated successfully:", response);
-        // Clear form fields
-        setItemId("");
-        setItemName("");
-        setQuantity("");
-        setDate("");
-        // Close the dialog
-        handleClose();
-        // Refetch the donors list
-        refetch();
-      })
-      .catch((error) => {
-        console.error("Error updating item:", error);
-      });
+  const [updateItems] = useUpdateItemsMutation();
+  // Populate form fields with donorToUpdate data when it's available
+  useEffect(() => {
+    if (itemsToUpdate) {
+      setitemName(itemsToUpdate.itemName);
+      setquantity(itemsToUpdate.quantity);
+      setdate(itemsToUpdate.date);
+    }
+  }, [itemsToUpdate]);
+
+  //const itemID = itemToUpdate ? itemToUpdate._id : "";
+
+  const validateInputs = () => {
+    let isValid = true;
+
+    // Validate itemID
+    if (!itemName.trim()) {
+      setitemNameError("Item Name is required");
+      isValid = false;
+    } else {
+      setitemNameError("");
+    }
+
+    // Validate quantity
+    if (!quantity.trim()) {
+      setquantityError("Quantity is required");
+      isValid = false;
+    } else {
+      setquantityError("");
+    }
+
+    // Validate date
+    if (!date.trim()) {
+      setdateError("Date is required");
+      isValid = false;
+    } else {
+      setdateError("");
+    }
+
+    return isValid;
+  };
+
+  const handleUpdateItems = () => {
+    if (validateInputs()) {
+      updateItems({ itemName, quantity, date })
+        .then((response) => {
+          console.log("Item updated successfully:", response);
+          // Clear form fields
+          setitemName("");
+          setquantity("");
+          setdate("");
+
+          // Close the dialog
+          handleClose();
+          // Refetch the donors list
+          refetch();
+        })
+        .catch((error) => {
+          console.error("Error updating item:", error);
+        });
+    }
   };
 
   const handleCancel = () => {
     // Clear form fields
-    setItemId("");
-    setItemName("");
-    setQuantity("");
-    setDate("");
+    setitemName("");
+    setquantity("");
+    setdate("");
+
+    setitemNameError("");
+    setquantityError("");
+    setdateError("");
+
     // Close the dialog
     handleClose();
   };
@@ -57,36 +107,55 @@ const UpdateFormCI = ({ open, handleClose, refetch }) => {
       </DialogTitle>
       <DialogContent>
         <TextField
-          label="Item Id"
-          value={itemId}
-          onChange={(e) => setItemId(e.target.value)}
-          fullWidth
-          variant="outlined"
-          margin="normal"
-        />
-        <TextField
           label="Item Name"
           value={itemName}
-          onChange={(e) => setItemName(e.target.value)}
+          onChange={(e) => setitemName(e.target.value)}
           fullWidth
           variant="outlined"
           margin="normal"
+          error={!!itemNameError}
+          helperText={itemNameError}
+          InputLabelProps={{
+            sx: {
+              "&.Mui-focused": {
+                color: theme.palette.secondary[100],
+              },
+            },
+          }}
         />
         <TextField
           label="Quantity"
           value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
+          onChange={(e) => setquantity(e.target.value)}
           fullWidth
           variant="outlined"
           margin="normal"
+          error={!!quantityError}
+          helperText={quantityError}
+          InputLabelProps={{
+            sx: {
+              "&.Mui-focused": {
+                color: theme.palette.secondary[100],
+              },
+            },
+          }}
         />
         <TextField
           label="Date"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(e) => setdate(e.target.value)}
           fullWidth
           variant="outlined"
           margin="normal"
+          error={!!dateError}
+          helperText={dateError}
+          InputLabelProps={{
+            sx: {
+              "&.Mui-focused": {
+                color: theme.palette.secondary[100],
+              },
+            },
+          }}
         />
       </DialogContent>
       <DialogActions>
@@ -104,7 +173,7 @@ const UpdateFormCI = ({ open, handleClose, refetch }) => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleUpdateCurrentItem}
+            onClick={handleUpdateItems}
           >
             Update
           </Button>

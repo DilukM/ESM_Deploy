@@ -2,31 +2,23 @@ import mongoose from "mongoose";
 
 const ItemsSchema = new mongoose.Schema(
   {
-   
-    itemID: {
-      type: String,
-      required: true,
-      min: 2,
-      max: 100,
-      unique: true,
-    },
     itemName: {
       type: String,
       required: true,
-      max: 50,
-      
-    },
-    points: {
-      type: String,
-      required: true,
       unique: true,
+      max: 50,
     },
-    type: {
+    unit: {
       type: String,
       required: true,
-      min: 8,
+      max: 50,
     },
-   
+
+    unitScore: {
+      type: Number,
+      required: true,
+      unique: false,
+    },
   },
   { timestamps: true }
 );

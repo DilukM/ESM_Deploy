@@ -6,6 +6,7 @@ export const api = createApi({
   tagTypes: [
     "Donors",
     "User",
+    "Events",
     "Products",
     "Customers",
     "Transactions",
@@ -14,15 +15,41 @@ export const api = createApi({
     "Admins",
     "Performance",
     "Dashboard",
-    //"CurrentItems",
-    //"ReleaseItems",
+    " ItemsOverview",
     "Items",
-    "Items_out",
+
+    "TreeEvents",
+    "Sponsors",
   ],
   endpoints: (build) => ({
     getUser: build.query({
       query: (id) => `general/user/${id}`,
       providesTags: ["User"],
+    }),
+
+    adminSignIn: build.mutation({
+      query: ({ email, password }) => ({
+        url: "auth/signin",
+        method: "POST",
+        body: { email, password },
+      }),
+    }),
+
+    // Signup endpoint
+    adminSignUp: build.mutation({
+      query: ({ firstName, email, lastName, password }) => ({
+        url: "users/signup",
+        method: "POST",
+        body: { firstName, email, lastName, password },
+      }),
+    }),
+
+    resetPassword: build.mutation({
+      query: ({ userId, password }) => ({
+        url: `users/${userId}/resetPassword`,
+        method: "POST",
+        body: { password },
+      }),
     }),
 
     getDonors: build.query({
@@ -53,12 +80,19 @@ export const api = createApi({
       providesTags: ["Donors"],
     }),
     updateDonor: build.mutation({
-      query: ({ donorId, name, email, phone, password }) => ({
+      query: ({ donorId, name, email, phone }) => ({
         url: `donors/update/${donorId}`,
         method: "PUT",
-        body: { name, email, phone, password },
+        body: { name, email, phone },
       }),
       providesTags: ["Donors"],
+    }),
+    resetPasswordDonor: build.mutation({
+      query: ({ donorId, password }) => ({
+        url: `donors/reset/${donorId}`,
+        method: "PUT",
+        body: { password },
+      }),
     }),
 
     //Donation Events Start
@@ -78,23 +112,145 @@ export const api = createApi({
       invalidatesTags: ["Events"], // Invalidate the cache for "Donors" after deletion
     }),
     addDEvent: build.mutation({
-      query: ({ eventDetails }) => ({
+      query: ({ eventName, location, date, description, cover }) => ({
         url: `donorevents/add`,
         method: "POST",
-        body: { eventDetails },
+        body: { eventName, location, date, description, cover },
       }),
       providesTags: ["Events"],
     }),
     updateDEvent: build.mutation({
-      query: ({ id, eventName, date, location }) => ({
+      query: ({ id, eventName, date, location, description, cover }) => ({
         url: `donorevents/update/${id}`,
         method: "PUT",
-        body: { id, eventName, date, location },
+        body: { eventName, date, location, description, cover },
       }),
       providesTags: ["Events"],
     }),
 
     //Donation Events End
+
+    //treeplantationEvent Start
+
+    getTreeEvents: build.query({
+      query: () => `treePlantationEvent/gets`,
+      providesTags: ["TreeEvents"],
+    }),
+    getTreeEvent: build.query({
+      query: (id) => `treePlantationEvent/events/${id}`,
+      providesTags: ["TreeEvents"],
+    }),
+    deleteTreeEvent: build.mutation({
+      query: (eventId) => ({
+        url: `treePlantationEvent/delete/${eventId}`,
+        method: "Delete",
+      }),
+      invalidatesTags: ["TreeEvents"], // Invalidate the cache for "Events" after deletion
+    }),
+    addTreeEvent: build.mutation({
+      query: ({
+        coverImage,
+        eventID,
+        eventName,
+        eventDate,
+        province,
+        district,
+        city,
+        comments,
+      }) => ({
+        url: `treePlantationEvent/add`,
+        method: "POST",
+        body: {
+          coverImage,
+          eventID,
+          eventName,
+          eventDate,
+          province,
+          district,
+          city,
+          comments,
+        }, // Prepare form data for file upload
+      }),
+      providesTags: ["TreeEvents"],
+    }),
+    updateTreeEvent: build.mutation({
+      query: (eventDetails) => ({
+        url: `treePlantationEvent/update/${eventDetails.eventId}`,
+        method: "PUT",
+        body: { eventDetails }, // Prepare form data for file upload
+      }),
+      providesTags: ["TreeEvents"],
+    }),
+
+    //treeplantationEvent End
+
+    // Sponsor endpoints
+    getSponsors: build.query({
+      query: () => `sponsors/gets`,
+      providesTags: ["Sponsors"],
+    }),
+    getSponsor: build.query({
+      query: (id) => `sponsors/events/${id}`,
+      providesTags: ["Sponsors"],
+    }),
+    deleteSponsor: build.mutation({
+      query: (eventId) => ({
+        url: `sponsors/delete/${eventId}`,
+        method: "Delete",
+      }),
+      invalidatesTags: ["Sponsors"], // Invalidate the cache for "Sponsors" after deletion
+    }),
+    addSponsor: build.mutation({
+      query: ({
+        eventID,
+        eventName,
+        eventDate,
+        province,
+        district,
+        city,
+        donations,
+      }) => ({
+        url: `sponsors/add`,
+        method: "POST",
+        body: {
+          eventID,
+          eventName,
+          eventDate,
+          province,
+          district,
+          city,
+          donations,
+        },
+      }),
+      providesTags: ["Sponsors"],
+    }),
+    updateSponsor: build.mutation({
+      query: ({
+        eventId,
+        eventID,
+        eventName,
+        eventDate,
+        province,
+        district,
+        city,
+        donations,
+      }) => ({
+        url: `sponsors/update/${eventId}`,
+        method: "PUT",
+        body: {
+          eventID,
+          eventName,
+          eventDate,
+          province,
+          district,
+          city,
+          donations,
+        },
+      }),
+      providesTags: ["Sponsors"],
+    }),
+
+    //sponsor End
 
     //Items...
 
@@ -103,7 +259,7 @@ export const api = createApi({
       providesTags: ["Items"],
     }),
     getItem: build.query({
-      query: (id) => `items/items/${id}`,
+      query: (id) => `items/get/${id}`,
       providesTags: ["Items"],
     }),
     deleteItems: build.mutation({
@@ -114,77 +270,103 @@ export const api = createApi({
       invalidatesTags: ["Items"], // Invalidate the cache for "Items" after deletion
     }),
     addItems: build.mutation({
-      query: ({ itemId, itemName, quantity, donorId, date }) => ({
+      query: ({ itemName, unit, unitScore }) => ({
         url: `items/add`,
         method: "POST",
-        body: { itemId, itemName, quantity, donorId, date },
+        body: { itemName, unit, unitScore },
       }),
       providesTags: ["Items"],
     }),
     updateItems: build.mutation({
-      query: ({ itemID, itemName, quantity, donorId, date }) => ({
+      query: ({ itemID, itemName, unit, unitScore }) => ({
         url: `items/update/${itemID}`,
         method: "PUT",
-        body: { itemID, itemName, quantity, donorId, date },
+        body: { itemName, unit, unitScore },
       }),
       providesTags: ["Items"],
     }),
 
     //...
 
-    //Items_out...
+    getItemsOut: build.query({
+      query: () => `items_out/gets`,
+      providesTags: ["Items_out"],
+    }),
+    getItem_out: build.query({
+      query: (id) => `items_out/get/${id}`,
+      providesTags: ["Items_out"],
+    }),
+    deleteItems_out: build.mutation({
+      query: (itemID) => ({
+        url: `items_out/delete/${itemID}`,
+        method: "Delete",
+      }),
+      invalidatesTags: ["Items_out"], // Invalidate the cache for "Items" after deletion
+    }),
+    addItems_out: build.mutation({
+      query: ({ itemName, itemId, quantity, eventName, eventId, date }) => ({
+        url: `items_out/add`,
+        method: "POST",
+        body: { itemName, itemId, quantity, eventName, eventId, date },
+      }),
+      providesTags: ["Items_out"],
+    }),
+    updateItems_out: build.mutation({
+      query: ({
+        itemID,
+        itemId,
+        itemName,
+        quantity,
+        eventId,
+        eventName,
+        date,
+      }) => ({
+        url: `items_out/update/${itemID}`,
+        method: "PUT",
+        body: { itemName, itemId, quantity, eventId, eventName, date },
+      }),
+      providesTags: ["Items_out"],
+    }),
 
-    // getItemss_out: build.query({
-    //   query: () => `items_out/gets`,
-    //   providesTags: ["Items_out"],
-    // }),
-    // getItems_out: build.query({
-    //   query: (id) => `items_out/items_out/${id}`,
-    //   providesTags: ["Items_out"],
-    // }),
-    // deleteItems_out: build.mutation({
-    //   query: (itemID) => ({
-    //     url: `items_out/delete/${itemID}`,
-    //     method: "Delete",
-    //   }),
-    //   invalidatesTags: ["Items_out"], // Invalidate the cache for "Items" after deletion
-    // }),
-    // addItems_out: build.mutation({
-    //   query: ({ itemID, quantity, eventId, date }) => ({
-    //     url: `items_out/add`,
-    //     method: "POST",
-    //     body: { itemID, quantity, eventId, date },
-    //   }),
-    //   providesTags: ["Items_out"],
-    // }),
-    // updateItems_out: build.mutation({
-    //   query: ({ itemID, quantity, eventId, date }) => ({
-    //     url: `items_out/update/${itemID}`,
-    //     method: "PUT",
-    //     body: { itemID, quantity, eventId, date },
-    //   }),
-    //   providesTags: ["Items_out"],
-    // }),
-
-    //...
-
-    // getCurrentItems: build.query({
-    //   query: () => `general/currentItems`,
-    //   providesTags: ["CurrentItems"],
-    // }),
-    // getCurrentItem: build.query({
-    //   query: (id) => `general/currentItems/${id}`,
-    //   providesTags: ["CurrentItems"],
-    // }),
-
-    // getReleaseItems: build.query({
-    //   query: () => `general/releaseItems`,
-    //   providesTags: ["ReleaseItems"],
-    // }),
-    // getReleaseItem: build.query({
-    //   query: (id) => `general/releaseItems/${id}`,
-    //   providesTags: ["ReleaseItems"],
-    // }),
+    getItemsIn: build.query({
+      query: () => `items_in/gets`,
+      providesTags: ["Items_in"],
+    }),
+    getItem_in: build.query({
+      query: (id) => `items_in/get/${id}`,
+      providesTags: ["Items_in"],
+    }),
+    deleteItems_in: build.mutation({
+      query: (itemID) => ({
+        url: `items_in/delete/${itemID}`,
+        method: "Delete",
+      }),
+      invalidatesTags: ["Items_in"], // Invalidate the cache for "Items" after deletion
+    }),
+    addItems_in: build.mutation({
+      query: ({ itemName, itemId, quantity, donorId, donorName, date }) => ({
+        url: `items_in/add`,
+        method: "POST",
+        body: { itemName, itemId, quantity, donorName, donorId, date },
+      }),
+      providesTags: ["Items_in"],
+    }),
+    updateItems_in: build.mutation({
+      query: ({
+        itemID,
+        itemName,
+        itemId,
+        donorName,
+        quantity,
+        donorId,
+        date,
+      }) => ({
+        url: `items_in/update/${itemID}`,
+        method: "PUT",
+        body: { itemName, itemId, donorName, quantity, donorId, date },
+      }),
+      providesTags: ["Items_in"],
+    }),
 
     getProducts: build.query({
       query: () => "client/products",
@@ -222,36 +404,6 @@ export const api = createApi({
       query: () => "general/dashboard",
       providesTags: ["Dashboard"],
     }),
-
-    // deleteCurrentItems: build.mutation({
-    //   query: (itemId) => ({
-    //     url: `general/currentItems/${itemId}`,
-    //     method: "Delete",
-    //   }),
-    //   invalidatesTags: ["CurrentItems"], // Invalidate the cache for "Items" after deletion
-    // }),
-    // addCurrentItem: build.mutation({
-    //   query: () => ({
-    //     url: `general/currentItems`,
-    //     method: "post",
-    //   }),
-    //   providesTags: ["CurrentItems"],
-    // }),
-
-    // deleteReleaseItems: build.mutation({
-    //   query: (itemId) => ({
-    //     url: `general/releaseItems/${itemId}`,
-    //     method: "Delete",
-    //   }),
-    //   invalidatesTags: ["ReleaseItems"], // Invalidate the cache for "Items" after deletion
-    // }),
-    // addReleaseItem: build.mutation({
-    //   query: () => ({
-    //     url: `general/releaseItems`,
-    //     method: "post",
-    //   }),
-    //   providesTags: ["ReleaseItems"],
-    // }),
   }),
 });
 
@@ -262,6 +414,7 @@ export const {
   useAddDonorMutation,
   useUpdateDonorMutation,
   useGetLeaderboardQuery,
+  useResetPasswordDonorMutation,
 
   useGetDEventsQuery,
   useDeleteDEventMutation,
@@ -269,20 +422,23 @@ export const {
   useAddDEventMutation,
   useUpdateDEventMutation,
 
+  useGetTreeEventsQuery,
+  useDeleteTreeEventMutation,
+  useGetTreeEventQuery,
+  useAddTreeEventMutation,
+  useUpdateTreeEventMutation,
+
+  useGetSponsorsQuery,
+  useDeleteSponsorMutation,
+  useGetSponsorQuery,
+  useAddSponsorMutation,
+  useUpdateSponsorMutation,
+
   useGetItemsQuery,
   useDeleteItemsMutation,
   useGetItemQuery,
   useAddItemsMutation,
   useUpdateItemsMutation,
-
-  useGetItemss_outQuery,
-  useDeleteItems_outMutation,
-  useGetItems_outQuery,
-  useAddItems_outMutation,
-  useUpdateItems_outMutation,
-
-  // useGetCurrentItemsQuery,
-  // useGetReleaseItemsQuery,
 
   useGetUserQuery,
   useGetProductsQuery,
@@ -294,12 +450,19 @@ export const {
   useGetUserPerformanceQuery,
   useGetDashboardQuery,
 
-  // useDeleteCurrentItemsMutation,
-  // useDeleteReleaseItemsMutation,
+  useAdminSignInMutation,
+  useAdminSignUpMutation,
+  useResetPasswordMutation,
 
-  // useGetCurrentItemQuery,
-  // useGetReleaseItemQuery,
+  useGetItemsOutQuery,
+  useDeleteItems_outMutation,
+  useGetItem_outQuery,
+  useAddItems_outMutation,
+  useUpdateItems_outMutation,
 
-  // useAddCurrentItemMutation,
-  // useAddReleaseItemMutation,
+  useGetItemsInQuery,
+  useDeleteItems_inMutation,
+  useGetItem_inQuery,
+  useAddItems_inMutation,
+  useUpdateItems_inMutation,
 } = api;
