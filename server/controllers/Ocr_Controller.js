@@ -36,8 +36,17 @@ export const addocr = async (req, res) => {
     // Save the donor to the database
     await newDonor.save();
 
+    // Generate JWT token
+    const token = jwt.sign(
+      { Id: newDonor.ID_Number },
+      "6474b13e42fd0f0c680c18ab4afa9fbca5e6e9584d98b3bc68617f0b5c8f4249",
+      {
+        expiresIn: "1h",
+      }
+    );
+
     // Send success response with token
-    res.status(200).json({});
+    res.status(200).json({ token });
   } catch (error) {
     console.error("Error registering user:", error);
     res
