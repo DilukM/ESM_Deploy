@@ -22,6 +22,7 @@ export const addocr = async (req, res) => {
       dob,
       Issue_Date,
       Expiry_Date,
+      Blood_Group,
     });
 
     // Save the donor to the database

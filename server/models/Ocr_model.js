@@ -16,25 +16,26 @@ const ocrSchema = new mongoose.Schema(
       type: String,
       required: true,
       min: 5,
-      
     },
     Address: {
       type: String,
       required: true,
-
     },
     dob: {
       type: String,
       required: true,
-
     },
     Issue_Date: {
       type: String,
-      default:null,
+      default: null,
     },
     Expiry_Date: {
-     type: String,
-     default:null,
+      type: String,
+      default: null,
+    },
+    Blood_Group: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }
