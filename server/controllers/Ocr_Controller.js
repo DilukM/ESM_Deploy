@@ -2,8 +2,16 @@ import ocr from "../models/Ocr_model.js";
 import jwt from "jsonwebtoken";
 
 export const addocr = async (req, res) => {
-  const { token_No, ID_Number, Name, Address, dob, Issue_Date, Expiry_Date } =
-    req.body;
+  const {
+    token_No,
+    ID_Number,
+    Name,
+    Address,
+    dob,
+    Issue_Date,
+    Expiry_Date,
+    Blood_Group,
+  } = req.body;
   try {
     // Check if the donor already exists
     const existingDonor = await ocr.findOne({ ID_Number });
